@@ -1,5 +1,6 @@
 package com.epam.oleksandr_sich.matchingpicturegame;
 
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -9,6 +10,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.bumptech.glide.Glide;
+import com.epam.oleksandr_sich.matchingpicturegame.data.ImageState;
 import com.epam.oleksandr_sich.matchingpicturegame.data.PhotoDTO;
 
 import java.util.ArrayList;
@@ -22,6 +25,11 @@ public class MainActivityFragment extends Fragment implements ImagesAdapter.Item
     private ImagesAdapter adapter;
     private RecyclerView recyclerView;
     private ImagePresenterImpl presenter;
+    private PhotoDTO sellecedPhoto;
+    private int selectedPosition = -1;
+    private int selectedItems = 0;
+    private int steps = 0;
+    final Handler handler = new Handler();
 
     public MainActivityFragment() {
     }
@@ -32,8 +40,8 @@ public class MainActivityFragment extends Fragment implements ImagesAdapter.Item
         View view = inflater.inflate(R.layout.fragment_main, container, false);
         recyclerView = view.findViewById(R.id.images);
         recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 4));
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
-         presenter = new ImagePresenterImpl(getActivity(), this);
+//        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        presenter = new ImagePresenterImpl(getActivity(), this);
 
         return view;
     }
@@ -41,8 +49,6 @@ public class MainActivityFragment extends Fragment implements ImagesAdapter.Item
     @Override
     public void onStart() {
         super.onStart();
-        String[] data = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"};
-
         adapter = new ImagesAdapter(getActivity(), new ArrayList<PhotoDTO>());
         adapter.setClickListener(this);
         recyclerView.setAdapter(adapter);
@@ -51,7 +57,43 @@ public class MainActivityFragment extends Fragment implements ImagesAdapter.Item
     }
 
     @Override
-    public void onItemClick(View view, int position) {
+    public void onItemClick(View view, final int position) {
+        if (adapter.getItem(position).getState() != ImageState.DEFAULT ||
+                selectedItems >= 2 ) return;
+            steps++;
+           if (selectedPosition == -1){
+            selectedPosition = position;
+            adapter.getItem(position).updateState(ImageState.SELECTED);
+            selectedItems++;
+            adapter.notifyItemChanged(position);
+        } else {
+                 if (adapter.getItem(selectedPosition).equals(adapter.getItem(position))){
+                adapter.getItem(selectedPosition).updateState(ImageState.DONE);
+                adapter.getItem(position).updateState(ImageState.DONE);
+                     selectedItems = 0;
+                     selectedPosition = -1;
+            } else {
+                adapter.getItem(selectedPosition).updateState(ImageState.CLOSED);
+                adapter.getItem(position).updateState(ImageState.CLOSED);
+                     selectedItems++;
+                     handler.postDelayed(new Runnable() {
+                         @Override
+                         public void run() {
+                             adapter.getItem(position).updateState(ImageState.DEFAULT);
+                             adapter.getItem(selectedPosition).updateState(ImageState.DEFAULT);
+                             adapter.notifyItemChanged(selectedPosition);
+                             adapter.notifyItemChanged(position);
+                             selectedItems = 0;
+                             selectedPosition = -1;
+                         }
+                     }, 1000);
+
+            }
+
+            adapter.notifyItemChanged(selectedPosition);
+            adapter.notifyItemChanged(position);
+
+        }
 
     }
 

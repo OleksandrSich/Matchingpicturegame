@@ -10,7 +10,9 @@ import com.epam.oleksandr_sich.matchingpicturegame.data.PhotoResponse;
 import com.epam.oleksandr_sich.matchingpicturegame.model.ImageRepository;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
@@ -29,34 +31,35 @@ public class ImagePresenterImpl implements ImagePresenter {
 
     @Override
     public void loadPhotos(int page) {
-        imageRepository.getPhotoList(page).subscribe(new Observer<PhotoListResponse>() {
-                                                          @Override
-                                                          public void onSubscribe(Disposable d) {
+        imageRepository.getPhotoList(page)
+                .subscribe(new Observer<PhotoListResponse>() {
+                               @Override
+                               public void onSubscribe(Disposable d) {
 
-                                                          }
+                               }
 
-                                                          @Override
-                                                          public void onNext(PhotoListResponse photoListResponse) {
-                                                              for (Photo temp: photoListResponse.getPhotos().getPhoto()) {
-                                                                  loadPhoto(temp.getId());
-                                                              }
-                                                          }
+                               @Override
+                               public void onNext(PhotoListResponse photoListResponse) {
+                                   for (Photo temp : photoListResponse.getPhotos().getPhoto()) {
+                                       loadPhoto(temp.getId());
+                                   }
+                               }
 
-                                                          @Override
-                                                          public void onError(Throwable e) {
+                               @Override
+                               public void onError(Throwable e) {
 
-                                                          }
+                               }
 
-                                                          @Override
-                                                          public void onComplete() {
+                               @Override
+                               public void onComplete() {
 
-                                                          }
-                                                      }
-        );
+                               }
+                           }
+                );
     }
 
-    public void loadPhoto(String id){
-      imageRepository.getPhoto(id)
+    public void loadPhoto(String id) {
+        imageRepository.getPhoto(id)
                 .subscribe(new Observer<PhotoResponse>() {
                                @Override
                                public void onSubscribe(Disposable d) {
@@ -64,7 +67,13 @@ public class ImagePresenterImpl implements ImagePresenter {
 
                                @Override
                                public void onNext(PhotoResponse photoResponse) {
-                                   photos.add(new PhotoDTO("1", photoResponse.getSizes().getSize().get(5).getUrl()));
+                                   String tempId = String.valueOf(photos.size() + 1);
+                                   photos.add(new PhotoDTO(tempId,
+                                           photoResponse.getSizes().getSize().get(5).getSource()));
+                                   photos.add(new PhotoDTO(tempId,
+                                           photoResponse.getSizes().getSize().get(5).getSource()));
+                                   long seed = System.nanoTime();
+                                   Collections.shuffle(photos, new Random(seed));
                                    view.showImages(photos);
 
                                }
@@ -80,7 +89,7 @@ public class ImagePresenterImpl implements ImagePresenter {
 
                                }
                            }
-        );
+                );
     }
 
     @Override

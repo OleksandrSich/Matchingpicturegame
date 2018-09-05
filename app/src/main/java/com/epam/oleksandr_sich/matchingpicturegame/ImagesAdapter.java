@@ -1,6 +1,8 @@
 package com.epam.oleksandr_sich.matchingpicturegame;
 
+import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -9,6 +11,10 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.Priority;
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.transition.ViewPropertyTransition;
+import com.epam.oleksandr_sich.matchingpicturegame.data.ImageState;
 import com.epam.oleksandr_sich.matchingpicturegame.data.PhotoDTO;
 
 import java.util.List;
@@ -19,14 +25,12 @@ public class ImagesAdapter extends RecyclerView.Adapter<ImagesAdapter.ViewHolder
     private LayoutInflater inflater;
     private ItemClickListener clickListener;
 
-    // data is passed into the constructor
     ImagesAdapter(Context context, List<PhotoDTO> data) {
         this.context = context;
         this.inflater = LayoutInflater.from(context);
         this.data = data;
     }
 
-    // inflates the cell layout from xml when needed
     @Override
     @NonNull
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -34,17 +38,11 @@ public class ImagesAdapter extends RecyclerView.Adapter<ImagesAdapter.ViewHolder
         return new ViewHolder(view);
     }
 
-    // binds the data to the TextView in each cell
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Glide.with(context)
-                .load(getItem(position).getUrl())
-                .into(holder.image);
-//        holder.image.setImageResource(R.drawable.ic_launcher_foreground);
-//        holder.image.setBackgroundColor(context.getResources().getColor(R.color.colorPrimary));
+        holder.showImage(position);
     }
 
-    // total number of cells
     @Override
     public int getItemCount() {
         return data.size();
@@ -56,7 +54,6 @@ public class ImagesAdapter extends RecyclerView.Adapter<ImagesAdapter.ViewHolder
     }
 
 
-    // stores and recycles views as they are scrolled off screen
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         ImageView image;
 
@@ -70,20 +67,64 @@ public class ImagesAdapter extends RecyclerView.Adapter<ImagesAdapter.ViewHolder
         public void onClick(View view) {
             if (clickListener != null) clickListener.onItemClick(view, getAdapterPosition());
         }
+
+        void showImage(final int position) {
+            switch (getItem(position).getState()) {
+                case DEFAULT:
+                    RequestOptions requestOptions = new RequestOptions().priority(Priority.IMMEDIATE);
+                    Glide.with(context)
+                            .download(getItem(position).getUrl())
+                            .apply(requestOptions)
+                            .submit();
+                    image.setImageResource(R.drawable.ic_launcher_background);
+                    break;
+                case SELECTED:
+                    Glide.with(context)
+                            .load(getItem(position).getUrl())
+                            .into(image);
+                    animationObject.animate(image);
+                    break;
+                case CLOSED:
+                    Glide.with(context)
+                            .load(getItem(position).getUrl())
+                      .into(image);
+
+                    if (getItem(position).getPreviousState() == ImageState.DEFAULT)
+                        animationObject.animate(image);
+
+
+                case DONE:
+                case OPENED:
+                    Glide.with(context)
+                            .load(getItem(position).getUrl())
+                            .into(image);
+                    break;
+            }
+
+        }
     }
 
-    // convenience method for getting data at click position
-    PhotoDTO getItem(int id) {
+    public PhotoDTO getItem(int id) {
         return data.get(id);
     }
 
-    // allows clicks events to be caught
     void setClickListener(ItemClickListener itemClickListener) {
         this.clickListener = itemClickListener;
     }
 
-    // parent activity will implement this method to respond to click events
     public interface ItemClickListener {
         void onItemClick(View view, int position);
     }
+
+    private ViewPropertyTransition.Animator animationObject = new ViewPropertyTransition.Animator() {
+        @Override
+        public void animate(View view) {
+            ObjectAnimator fadeAnim = ObjectAnimator.ofFloat(view, "rotationY", 180f, 0f);
+            fadeAnim.setDuration(500);
+            fadeAnim.setAutoCancel(true);
+            fadeAnim.start();
+        }
+    };
+
+
 }
