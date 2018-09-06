@@ -1,11 +1,8 @@
 package com.epam.oleksandr_sich.matchingpicturegame;
 
 import android.content.Context;
-import android.util.Log;
 
-import com.epam.oleksandr_sich.matchingpicturegame.data.Photo;
 import com.epam.oleksandr_sich.matchingpicturegame.data.PhotoItem;
-import com.epam.oleksandr_sich.matchingpicturegame.data.PhotoListResponse;
 import com.epam.oleksandr_sich.matchingpicturegame.data.PhotoResponse;
 import com.epam.oleksandr_sich.matchingpicturegame.model.ImageRepository;
 
@@ -14,91 +11,78 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import io.reactivex.Observer;
+import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 
 public class ImagePresenterImpl implements ImagePresenter {
+    private final int START_PAGE = 1;
+    private final int PER_PAGE = 8;
     private Context context;
     private List<PhotoItem> photos = new ArrayList<>();
     private ImageRepository imageRepository;
     private ImageView view;
+    private int currentPage = START_PAGE;
+    private Disposable loadPhotosSubscription;
 
     public ImagePresenterImpl(Context context, ImageView view) {
         this.context = context;
-        imageRepository = new ImageRepository();
         this.view = view;
+        imageRepository = new ImageRepository();
     }
 
     @Override
-    public void loadPhotos(int page) {
-        imageRepository.getPhotoList(page)
-                .subscribe(new Observer<PhotoListResponse>() {
-                               @Override
-                               public void onSubscribe(Disposable d) {
-
-                               }
-
-                               @Override
-                               public void onNext(PhotoListResponse photoListResponse) {
-                                   for (Photo temp : photoListResponse.getPhotos().getPhoto()) {
-                                       loadPhoto(temp.getId());
-                                   }
-                               }
-
-                               @Override
-                               public void onError(Throwable e) {
-
-                               }
-
-                               @Override
-                               public void onComplete() {
-
-                               }
-                           }
-                );
+    public void loadPhotos() {
+        currentPage++;
+        photos.clear();
+        view.showLoading(true);
+        loadPhotosRequest(currentPage);
     }
 
-    private void loadPhoto(String id) {
-        imageRepository.getPhoto(id)
-                .subscribe(new Observer<PhotoResponse>() {
-                               @Override
-                               public void onSubscribe(Disposable d) {
-                               }
+    private void loadPhotosRequest(int page) {
+        loadPhotosSubscription = imageRepository.getPhotoList(page, PER_PAGE)
+                .map(response -> response.getPhotos().getPhoto())
+                .flatMap(Observable::fromIterable)
+                .subscribe(photo -> imageRepository.getPhoto(photo.getId())
+                        .doOnError(throwable -> view.showLoading(false))
+                        .subscribe(this::loadPhoto));
+    }
 
-                               @Override
-                               public void onNext(PhotoResponse photoResponse) {
-                                   String tempId = String.valueOf(photos.size() + 1);
-                                   photos.add(new PhotoItem(tempId,
-                                           photoResponse.getSizes().getSize().get(5).getSource()));
-                                   photos.add(new PhotoItem(tempId,
-                                           photoResponse.getSizes().getSize().get(5).getSource()));
-                                   long seed = System.nanoTime();
-                                   Collections.shuffle(photos, new Random(seed));
-                                   view.showImages(photos);
 
-                               }
+    private void shuffleList() {
+        long seed = System.nanoTime();
+        Collections.shuffle(photos, new Random(seed));
+    }
 
-                               @Override
-                               public void onError(Throwable t) {
-                                   Log.d("PhotoResponse", "error");
+    private void addItemToList(PhotoResponse photoResponse) {
+        String tempId = String.valueOf(photos.size() + 1);
+        photos.add(new PhotoItem(tempId, getSizedPhoto(photoResponse)));
+        photos.add(new PhotoItem(tempId, getSizedPhoto(photoResponse)));
+    }
 
-                               }
-
-                               @Override
-                               public void onComplete() {
-
-                               }
-                           }
-                );
+    private boolean isListFull() {
+        return photos.size() == PER_PAGE * 2;
     }
 
     @Override
     public void onStop() {
-
+        loadPhotosSubscription.dispose();
     }
 
     @Override
     public void onStart() {
 
+    }
+
+    private String getSizedPhoto(PhotoResponse photoResponse) {
+        return photoResponse.getSizes().getSize().get(5).getSource();
+    }
+
+    private void loadPhoto(PhotoResponse photoResponse) {
+        addItemToList(photoResponse);
+        if(isListFull()) {
+            view.showLoading(false);
+            shuffleList();
+            view.showImages(photos);
+        }
     }
 }

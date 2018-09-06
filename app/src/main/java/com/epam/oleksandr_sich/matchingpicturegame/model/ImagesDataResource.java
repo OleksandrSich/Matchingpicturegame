@@ -7,7 +7,7 @@ import io.reactivex.Observable;
 
 interface ImagesDataResource {
 
-    Observable<PhotoListResponse> getPhotoList(int page);
+    Observable<PhotoListResponse> getPhotoList(int page, int perPage);
 
     Observable<PhotoResponse> getPhoto(String id);
 }

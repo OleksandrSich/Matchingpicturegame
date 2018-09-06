@@ -20,6 +20,10 @@ android {
     dexOptions {
         javaMaxHeapSize "4g"
     }
+    compileOptions {
+        targetCompatibility 1.8
+        sourceCompatibility 1.8
+    }
 }
 
 dependencies {
@@ -31,7 +35,7 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     implementation 'com.squareup.retrofit2:retrofit:2.4.0'
-
+    implementation 'com.roger.catloadinglibrary:catloadinglibrary:1.0.4'
     //RxJava2
 
     implementation "io.reactivex.rxjava2:rxjava:2.2.0"

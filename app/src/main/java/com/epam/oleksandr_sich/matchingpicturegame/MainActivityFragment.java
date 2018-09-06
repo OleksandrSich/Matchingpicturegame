@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 
 import com.epam.oleksandr_sich.matchingpicturegame.data.ImageState;
 import com.epam.oleksandr_sich.matchingpicturegame.data.PhotoItem;
+import com.roger.catloadinglibrary.CatLoadingView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +28,7 @@ public class MainActivityFragment extends Fragment implements ImagesAdapter.Item
     private int selectedItems = 0;
     private int steps = 0;
     final Handler handler = new Handler();
-
+    private CatLoadingView loadingView;
     public MainActivityFragment() {
     }
 
@@ -39,7 +40,7 @@ public class MainActivityFragment extends Fragment implements ImagesAdapter.Item
         recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 4));
 //        recyclerView.setItemAnimator(new DefaultItemAnimator());
         presenter = new ImagePresenterImpl(getActivity(), this);
-
+        loadingView = new CatLoadingView();
         return view;
     }
 
@@ -50,7 +51,7 @@ public class MainActivityFragment extends Fragment implements ImagesAdapter.Item
         adapter.setClickListener(this);
         recyclerView.setAdapter(adapter);
         adapter.notifyDataSetChanged();
-        presenter.loadPhotos(1);
+        presenter.loadPhotos();
     }
 
     @Override
@@ -103,6 +104,20 @@ public class MainActivityFragment extends Fragment implements ImagesAdapter.Item
     @Override
     public void showImages(List<PhotoItem> photos) {
         adapter.updateItems(photos);
+    }
+
+    @Override
+    public void showLoading(boolean state) {
+        if (state){
+            loadingView.show(getFragmentManager(), "");
+        } else {
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    loadingView.dismiss();
+                }
+            }, 1500);
+        }
     }
 
     private boolean isWon() {

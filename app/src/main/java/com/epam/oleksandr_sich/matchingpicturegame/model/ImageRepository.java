@@ -26,9 +26,9 @@ public class ImageRepository implements ImagesDataResource {
     private BaseSchedulerProvider mSchedulerProvider =  SchedulerProvider.getInstance();
 
     @Override
-    public Observable<PhotoListResponse> getPhotoList(final int page) {
+    public Observable<PhotoListResponse> getPhotoList(final int page, final int perPage) {
        return NetworkClient.getRetrofit().create(NetworkInterface.class).listPhotos(SEARCH_METHOD, API_KEY, NO_JSON_CALL,
-                TAGS, PER_PAGE, FORMAT_JSON, page)
+                TAGS, perPage, FORMAT_JSON, page)
                 .subscribeOn(mSchedulerProvider.computation())
                 .observeOn(mSchedulerProvider.ui());
 

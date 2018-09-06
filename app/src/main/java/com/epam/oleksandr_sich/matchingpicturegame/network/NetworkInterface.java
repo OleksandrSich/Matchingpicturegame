@@ -17,7 +17,7 @@ public interface NetworkInterface {
                                              @Query("api_key") String apiKey,
                                              @Query("nojsoncallback") int noJsonCallback,
                                              @Query("tags") String tags,
-                                             @Query("per_page") String perPage,
+                                             @Query("per_page") int perPage,
                                              @Query("format") String format,
                                              @Query("page") int page);
 

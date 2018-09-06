@@ -89,8 +89,6 @@ public class ImagesAdapter extends RecyclerView.Adapter<ImagesAdapter.ViewHolder
                       .into(image);
                     if (getItem(position).getPreviousState() == ImageState.DEFAULT)
                         animationObject.animate(image);
-
-
                 case DONE:
                 case OPENED:
                     Glide.with(context)

@@ -2,7 +2,7 @@ package com.epam.oleksandr_sich.matchingpicturegame;
 
 interface ImagePresenter {
 
-    void loadPhotos(int page);
+    void loadPhotos();
 
     void onStop();
 
