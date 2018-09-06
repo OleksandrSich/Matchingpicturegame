@@ -2,4 +2,6 @@
     <dimen name="photo_item_width">184dp</dimen>
     <dimen name="photo_item_height">236dp</dimen>
     <dimen name="photo_list_margin">16dp</dimen>
+    <dimen name="loading_image_size">350dp</dimen>
+    <dimen name="loading_title">28sp</dimen>
 </resources>

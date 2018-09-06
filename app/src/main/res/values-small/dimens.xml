@@ -1,6 +1,7 @@
 <resources>
     <dimen name="photo_item_width">70dp</dimen>
     <dimen name="photo_item_height">90dp</dimen>
-
     <dimen name="photo_list_margin">4dp</dimen>
+    <dimen name="loading_image_size">300dp</dimen>
+    <dimen name="loading_title">28sp</dimen>
 </resources>

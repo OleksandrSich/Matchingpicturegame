@@ -80,7 +80,6 @@ public class ImagePresenterImpl implements ImagePresenter {
 
     @Override
     public void onStart() {
-
     }
 
     private String getSizedPhoto(PhotoResponse photoResponse) {

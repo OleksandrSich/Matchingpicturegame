@@ -6,12 +6,14 @@ import com.epam.oleksandr_sich.matchingpicturegame.ImagesAdapter;
 import com.epam.oleksandr_sich.matchingpicturegame.data.ImageState;
 
 public class GameControllerImpl implements GameController{
-    public GameControllerImpl(ImagesAdapter adapter) {
+    public GameControllerImpl(ImagesAdapter adapter, GameResult gameResult) {
         this.adapter = adapter;
+        this.gameResult = gameResult;
     }
 
     private final Handler handler = new Handler();
     private ImagesAdapter adapter;
+    private GameResult gameResult;
     private int selectedPosition = -1;
     private int selectedItems = 0;
     private int steps = 0;
@@ -95,6 +97,7 @@ public class GameControllerImpl implements GameController{
     }
 
     private void finishGame() {
+        gameResult.gameFinished(steps/2);
     }
 
     private void updateItemState(int position, ImageState imageState) {

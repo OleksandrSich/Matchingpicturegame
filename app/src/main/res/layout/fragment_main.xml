@@ -3,8 +3,36 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorGrey"
     tools:context=".view.MainActivityFragment"
     tools:showIn="@layout/activity_main">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/loadingView"
+        android:visibility="gone">
+        <ImageView
+            android:layout_width="@dimen/loading_image_size"
+            android:layout_height="@dimen/loading_image_size"
+            android:layout_centerInParent="true"
+            android:id="@+id/loadingImage"
+            android:src="@mipmap/ic_launcher_foreground"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/loadingImage"
+            android:textSize="24sp"
+            android:id="@+id/loadingTitle"
+            android:layout_centerHorizontal="true"
+            android:text="@string/loading"/>
+        <ProgressBar
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="50dp"
+            android:layout_below="@+id/loadingTitle"
+            />
+    </RelativeLayout>
 
     <android.support.v7.widget.RecyclerView
         android:layout_width="match_parent"

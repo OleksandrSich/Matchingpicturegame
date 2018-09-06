@@ -12,8 +12,15 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+
+import android.content.DialogInterface;
+import android.support.v7.app.AlertDialog;
+import android.widget.TextView;
 
 import com.epam.oleksandr_sich.matchingpicturegame.game.GameControllerImpl;
+import com.epam.oleksandr_sich.matchingpicturegame.game.GameResult;
 import com.epam.oleksandr_sich.matchingpicturegame.presenter.ImagePresenterImpl;
 import com.epam.oleksandr_sich.matchingpicturegame.ImagesAdapter;
 import com.epam.oleksandr_sich.matchingpicturegame.R;
@@ -26,14 +33,13 @@ import java.util.List;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class MainActivityFragment extends Fragment implements ImagesAdapter.ItemClickListener, ImageView {
+public class MainActivityFragment extends Fragment implements ImagesAdapter.ItemClickListener, ImageView, GameResult {
 
     private RecyclerView recyclerView;
     private ImagePresenterImpl presenter;
     private ImagesAdapter adapter;
-    private CatLoadingView loadingView;
+    private RelativeLayout loadingView;
     private GameControllerImpl gameControllerImpl;
-    private final Handler handler = new Handler();
 
     public MainActivityFragment() {
     }
@@ -43,7 +49,7 @@ public class MainActivityFragment extends Fragment implements ImagesAdapter.Item
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_main, container, false);
         recyclerView = view.findViewById(R.id.images);
-        initLoadingDialog();
+        loadingView = view.findViewById(R.id.loadingView);
         init();
         loadPhotos();
         return view;
@@ -58,7 +64,7 @@ public class MainActivityFragment extends Fragment implements ImagesAdapter.Item
         presenter = new ImagePresenterImpl(getActivity(), this);
         initList();
         initAdapter();
-        gameControllerImpl = new GameControllerImpl(adapter);
+        gameControllerImpl = new GameControllerImpl(adapter, this);
         setHasOptionsMenu(true);
     }
 
@@ -75,11 +81,6 @@ public class MainActivityFragment extends Fragment implements ImagesAdapter.Item
         recyclerView.setItemAnimator(new DefaultItemAnimator());
     }
 
-    private void initLoadingDialog() {
-        loadingView = new CatLoadingView();
-        loadingView.setCancelable(false);
-    }
-
     @Override
     public void onItemClick(View view, final int position) {
         gameControllerImpl.flipCard(position);
@@ -93,15 +94,9 @@ public class MainActivityFragment extends Fragment implements ImagesAdapter.Item
 
     @Override
     public void showLoading(boolean state) {
-        if (state && loadingView.getDialog() == null) {
-            loadingView.show(getFragmentManager(), "");
-        } else {
-            handler.postDelayed(() -> {
-                if (loadingView.getDialog() != null) {
-                    loadingView.dismiss();
-                }
-            }, 1000);
-        }
+        loadingView.setVisibility(state ? View.VISIBLE : View.GONE);
+        recyclerView.setVisibility(state ? View.GONE : View.VISIBLE);
+
     }
 
     @Override
@@ -111,22 +106,43 @@ public class MainActivityFragment extends Fragment implements ImagesAdapter.Item
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.menu_main, menu);
-
+    public void onStart() {
+        super.onStart();
+        presenter.onStart();
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_settings) {
-            presenter.loadPhotos();
-            gameControllerImpl.clearGameData();
+            restart();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void gameFinished(int steps) {
+        showFinishAlert(steps);
+    }
+
+    private void showFinishAlert(int steps) {
+        View layoutView = getLayoutInflater().inflate(R.layout.win_layout, null);
+        TextView winLabel = layoutView.findViewById(R.id.winLabel);
+        winLabel.setText(getString(R.string.congratulations, steps));
+        AlertDialog alertDialog = new AlertDialog.Builder(getContext())
+                .setView(layoutView)
+                .setPositiveButton(R.string.start_new, (dialogInterface, i) -> restart())
+                .create();
+        alertDialog.show();
+    }
+
+    private void restart() {
+        gameControllerImpl.clearGameData();
+        adapter.updateItems(new ArrayList<>());
+        adapter.notifyDataSetChanged();
+        presenter.loadPhotos();
     }
 
 }
