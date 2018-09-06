@@ -10,10 +10,10 @@ public class Size {
     private String label;
     @SerializedName("width")
     @Expose
-    private String width;
+    private int width;
     @SerializedName("height")
     @Expose
-    private String height;
+    private int height;
     @SerializedName("source")
     @Expose
     private String source;
@@ -32,19 +32,19 @@ public class Size {
         this.label = label;
     }
 
-    public String getWidth() {
+    public int getWidth() {
         return width;
     }
 
-    public void setWidth(String width) {
+    public void setWidth(int width) {
         this.width = width;
     }
 
-    public String getHeight() {
+    public int getHeight() {
         return height;
     }
 
-    public void setHeight(String height) {
+    public void setHeight(int height) {
         this.height = height;
     }
 

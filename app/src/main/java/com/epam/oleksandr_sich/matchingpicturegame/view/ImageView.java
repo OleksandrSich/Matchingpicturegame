@@ -1,4 +1,4 @@
-package com.epam.oleksandr_sich.matchingpicturegame;
+package com.epam.oleksandr_sich.matchingpicturegame.view;
 
 import com.epam.oleksandr_sich.matchingpicturegame.data.PhotoItem;
 

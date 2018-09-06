@@ -24,7 +24,7 @@ public class ImagesAdapter extends RecyclerView.Adapter<ImagesAdapter.ViewHolder
     private LayoutInflater inflater;
     private ItemClickListener clickListener;
 
-    ImagesAdapter(Context context, List<PhotoItem> data) {
+    public ImagesAdapter(Context context, List<PhotoItem> data) {
         this.context = context;
         this.inflater = LayoutInflater.from(context);
         this.data = data;
@@ -98,7 +98,7 @@ public class ImagesAdapter extends RecyclerView.Adapter<ImagesAdapter.ViewHolder
         return data.get(id);
     }
 
-    void setClickListener(ItemClickListener itemClickListener) {
+    public void setClickListener(ItemClickListener itemClickListener) {
         this.clickListener = itemClickListener;
     }
 

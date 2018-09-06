@@ -1,13 +1,17 @@
-package com.epam.oleksandr_sich.matchingpicturegame;
+package com.epam.oleksandr_sich.matchingpicturegame.presenter;
 
-import android.content.Context;
+import android.app.Activity;
+import android.graphics.Point;
+import android.view.Display;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.request.RequestOptions;
 import com.epam.oleksandr_sich.matchingpicturegame.data.PhotoItem;
 import com.epam.oleksandr_sich.matchingpicturegame.data.PhotoResponse;
+import com.epam.oleksandr_sich.matchingpicturegame.data.Size;
 import com.epam.oleksandr_sich.matchingpicturegame.model.ImageRepository;
+import com.epam.oleksandr_sich.matchingpicturegame.view.ImageView;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,14 +24,17 @@ import io.reactivex.disposables.Disposable;
 public class ImagePresenterImpl implements ImagePresenter {
     private final int START_PAGE = 1;
     private final int PER_PAGE = 8;
-    private Context context;
+    public static int SPAN_COUNT = 4;
+    private Activity context;
     private List<PhotoItem> photos = new ArrayList<>();
     private ImageRepository imageRepository;
     private ImageView view;
+    private int lastPage = 2;
     private int currentPage = START_PAGE;
     private Disposable loadPhotosSubscription;
+    private int cardWeight;
 
-    public ImagePresenterImpl(Context context, ImageView view) {
+    public ImagePresenterImpl(Activity context, ImageView view) {
         this.context = context;
         this.view = view;
         imageRepository = new ImageRepository();
@@ -35,15 +42,15 @@ public class ImagePresenterImpl implements ImagePresenter {
 
     @Override
     public void loadPhotos() {
-        currentPage++;
         photos.clear();
         view.showLoading(true);
-        loadPhotosRequest(currentPage);
+        loadPhotosRequest(getNextPage());
     }
 
     private void loadPhotosRequest(int page) {
         loadPhotosSubscription = imageRepository.getPhotoList(page, PER_PAGE)
-                .map(response -> response.getPhotos().getPhoto())
+                .map(response -> {lastPage = response.getPhotos().getPages();
+                        return response.getPhotos().getPhoto();})
                 .flatMap(Observable::fromIterable)
                 .subscribe(photo -> imageRepository.getPhoto(photo.getId())
                         .doOnError(throwable -> view.showLoading(false))
@@ -57,9 +64,9 @@ public class ImagePresenterImpl implements ImagePresenter {
     }
 
     private void addItemToList(PhotoResponse photoResponse) {
-        String tempId = String.valueOf(photos.size() + 1);
-        photos.add(new PhotoItem(tempId, getSizedPhoto(photoResponse)));
-        photos.add(new PhotoItem(tempId, getSizedPhoto(photoResponse)));
+        PhotoItem photoItem = new PhotoItem(String.valueOf(photos.size() + 1), getSizedPhoto(photoResponse));
+        photos.add(photoItem);
+        photos.add(photoItem.createDuplicate());
     }
 
     private boolean isListFull() {
@@ -77,7 +84,14 @@ public class ImagePresenterImpl implements ImagePresenter {
     }
 
     private String getSizedPhoto(PhotoResponse photoResponse) {
-        return photoResponse.getSizes().getSize().get(5).getSource();
+        List<Size> sizes = photoResponse.getSizes().getSize();
+        Collections.sort(sizes, (size, t1) -> Integer.compare(size.getWidth(), t1.getWidth()));
+        for (Size size : sizes) {
+            if (size.getWidth() > getCardWeight()) {
+             return size.getSource();
+            }
+        }
+        return photoResponse.getSizes().getSize().get(0).getSource();
     }
 
     private void loadPhoto(PhotoResponse photoResponse) {
@@ -96,5 +110,22 @@ public class ImagePresenterImpl implements ImagePresenter {
                 .download(getSizedPhoto(photoResponse))
                 .apply(requestOptions)
                 .submit();
+    }
+
+    public int getCardWeight() {
+        if (cardWeight <= 0 && context.getWindowManager() != null) {
+            Display display = context.getWindowManager().getDefaultDisplay();
+            Point size = new Point();
+            display.getSize(size);
+            cardWeight = size.x / SPAN_COUNT;
+        }
+        return cardWeight;
+    }
+
+    private int getNextPage(){
+        if (currentPage < lastPage){
+            currentPage++;
+        } else currentPage = START_PAGE;
+       return currentPage;
     }
 }
