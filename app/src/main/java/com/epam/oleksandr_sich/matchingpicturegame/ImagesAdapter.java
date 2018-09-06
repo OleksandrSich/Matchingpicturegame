@@ -2,7 +2,6 @@ package com.epam.oleksandr_sich.matchingpicturegame;
 
 import android.animation.ObjectAnimator;
 import android.content.Context;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -15,17 +14,17 @@ import com.bumptech.glide.Priority;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.transition.ViewPropertyTransition;
 import com.epam.oleksandr_sich.matchingpicturegame.data.ImageState;
-import com.epam.oleksandr_sich.matchingpicturegame.data.PhotoDTO;
+import com.epam.oleksandr_sich.matchingpicturegame.data.PhotoItem;
 
 import java.util.List;
 
 public class ImagesAdapter extends RecyclerView.Adapter<ImagesAdapter.ViewHolder> {
-    private List<PhotoDTO> data;
+    private List<PhotoItem> data;
     private Context context;
     private LayoutInflater inflater;
     private ItemClickListener clickListener;
 
-    ImagesAdapter(Context context, List<PhotoDTO> data) {
+    ImagesAdapter(Context context, List<PhotoItem> data) {
         this.context = context;
         this.inflater = LayoutInflater.from(context);
         this.data = data;
@@ -48,7 +47,7 @@ public class ImagesAdapter extends RecyclerView.Adapter<ImagesAdapter.ViewHolder
         return data.size();
     }
 
-    public void updateItems(List<PhotoDTO> photos) {
+    public void updateItems(List<PhotoItem> photos) {
         data = photos;
         notifyDataSetChanged();
     }
@@ -88,7 +87,6 @@ public class ImagesAdapter extends RecyclerView.Adapter<ImagesAdapter.ViewHolder
                     Glide.with(context)
                             .load(getItem(position).getUrl())
                       .into(image);
-
                     if (getItem(position).getPreviousState() == ImageState.DEFAULT)
                         animationObject.animate(image);
 
@@ -104,7 +102,7 @@ public class ImagesAdapter extends RecyclerView.Adapter<ImagesAdapter.ViewHolder
         }
     }
 
-    public PhotoDTO getItem(int id) {
+    public PhotoItem getItem(int id) {
         return data.get(id);
     }
 

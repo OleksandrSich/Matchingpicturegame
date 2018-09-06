@@ -1,5 +1,5 @@
 <resources>
     <string name="app_name">Matching picture game</string>
-    <string name="action_settings">Settings</string>
+    <string name="action_restart">Restart</string>
     <string name="hello_i_m_random_cat">Hello! I am random cat</string>
 </resources>

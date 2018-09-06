@@ -4,7 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.epam.oleksandr_sich.matchingpicturegame.data.Photo;
-import com.epam.oleksandr_sich.matchingpicturegame.data.PhotoDTO;
+import com.epam.oleksandr_sich.matchingpicturegame.data.PhotoItem;
 import com.epam.oleksandr_sich.matchingpicturegame.data.PhotoListResponse;
 import com.epam.oleksandr_sich.matchingpicturegame.data.PhotoResponse;
 import com.epam.oleksandr_sich.matchingpicturegame.model.ImageRepository;
@@ -19,7 +19,7 @@ import io.reactivex.disposables.Disposable;
 
 public class ImagePresenterImpl implements ImagePresenter {
     private Context context;
-    private List<PhotoDTO> photos = new ArrayList<>();
+    private List<PhotoItem> photos = new ArrayList<>();
     private ImageRepository imageRepository;
     private ImageView view;
 
@@ -58,7 +58,7 @@ public class ImagePresenterImpl implements ImagePresenter {
                 );
     }
 
-    public void loadPhoto(String id) {
+    private void loadPhoto(String id) {
         imageRepository.getPhoto(id)
                 .subscribe(new Observer<PhotoResponse>() {
                                @Override
@@ -68,9 +68,9 @@ public class ImagePresenterImpl implements ImagePresenter {
                                @Override
                                public void onNext(PhotoResponse photoResponse) {
                                    String tempId = String.valueOf(photos.size() + 1);
-                                   photos.add(new PhotoDTO(tempId,
+                                   photos.add(new PhotoItem(tempId,
                                            photoResponse.getSizes().getSize().get(5).getSource()));
-                                   photos.add(new PhotoDTO(tempId,
+                                   photos.add(new PhotoItem(tempId,
                                            photoResponse.getSizes().getSize().get(5).getSource()));
                                    long seed = System.nanoTime();
                                    Collections.shuffle(photos, new Random(seed));

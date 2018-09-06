@@ -2,13 +2,13 @@ package com.epam.oleksandr_sich.matchingpicturegame.data;
 
 import java.util.Objects;
 
-public class PhotoDTO {
+public class PhotoItem {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof PhotoDTO)) return false;
-        PhotoDTO photoDTO = (PhotoDTO) o;
-        return Objects.equals(getId(), photoDTO.getId());
+        if (!(o instanceof PhotoItem)) return false;
+        PhotoItem photoItem = (PhotoItem) o;
+        return Objects.equals(getId(), photoItem.getId());
     }
 
     @Override
@@ -17,7 +17,7 @@ public class PhotoDTO {
         return Objects.hash(getId());
     }
 
-    public PhotoDTO(String id, String url) {
+    public PhotoItem(String id, String url) {
         this.id = id;
         this.url = url;
     }
