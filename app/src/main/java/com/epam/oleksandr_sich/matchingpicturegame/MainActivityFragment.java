@@ -3,9 +3,13 @@ package com.epam.oleksandr_sich.matchingpicturegame;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -37,11 +41,17 @@ public class MainActivityFragment extends Fragment implements ImagesAdapter.Item
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_main, container, false);
         recyclerView = view.findViewById(R.id.images);
+        init();
+        return view;
+    }
+
+    private void init() {
         recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 4));
-//        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
         presenter = new ImagePresenterImpl(getActivity(), this);
         loadingView = new CatLoadingView();
-        return view;
+        loadingView.setCancelable(false);
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -129,5 +139,31 @@ public class MainActivityFragment extends Fragment implements ImagesAdapter.Item
             }
         }
         return res;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_main, menu);
+
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_settings) {
+            presenter.loadPhotos();
+            clearGameData();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void clearGameData(){
+      selectedPosition = -1;
+      selectedItems = 0;
+      steps = 0;
     }
 }

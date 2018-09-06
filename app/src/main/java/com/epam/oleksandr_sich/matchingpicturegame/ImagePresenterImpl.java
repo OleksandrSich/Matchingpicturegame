@@ -2,6 +2,9 @@ package com.epam.oleksandr_sich.matchingpicturegame;
 
 import android.content.Context;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.Priority;
+import com.bumptech.glide.request.RequestOptions;
 import com.epam.oleksandr_sich.matchingpicturegame.data.PhotoItem;
 import com.epam.oleksandr_sich.matchingpicturegame.data.PhotoResponse;
 import com.epam.oleksandr_sich.matchingpicturegame.model.ImageRepository;
@@ -79,10 +82,19 @@ public class ImagePresenterImpl implements ImagePresenter {
 
     private void loadPhoto(PhotoResponse photoResponse) {
         addItemToList(photoResponse);
+        loadImage(photoResponse);
         if(isListFull()) {
             view.showLoading(false);
             shuffleList();
             view.showImages(photos);
         }
+    }
+
+    private void loadImage(PhotoResponse photoResponse) {
+        RequestOptions requestOptions = new RequestOptions().priority(Priority.IMMEDIATE);
+        Glide.with(context)
+                .download(getSizedPhoto(photoResponse))
+                .apply(requestOptions)
+                .submit();
     }
 }

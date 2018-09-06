@@ -1,0 +1,5 @@
+<resources>
+    <dimen name="photo_item_width">90dp</dimen>
+    <dimen name="photo_item_height">110dp</dimen>
+    <dimen name="photo_list_margin">8dp</dimen>
+</resources>

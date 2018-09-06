@@ -70,11 +70,6 @@ public class ImagesAdapter extends RecyclerView.Adapter<ImagesAdapter.ViewHolder
         void showImage(final int position) {
             switch (getItem(position).getState()) {
                 case DEFAULT:
-                    RequestOptions requestOptions = new RequestOptions().priority(Priority.IMMEDIATE);
-                    Glide.with(context)
-                            .download(getItem(position).getUrl())
-                            .apply(requestOptions)
-                            .submit();
                     image.setImageResource(R.drawable.ic_launcher_background);
                     break;
                 case SELECTED:
@@ -90,7 +85,6 @@ public class ImagesAdapter extends RecyclerView.Adapter<ImagesAdapter.ViewHolder
                     if (getItem(position).getPreviousState() == ImageState.DEFAULT)
                         animationObject.animate(image);
                 case DONE:
-                case OPENED:
                     Glide.with(context)
                             .load(getItem(position).getUrl())
                             .into(image);
@@ -112,14 +106,11 @@ public class ImagesAdapter extends RecyclerView.Adapter<ImagesAdapter.ViewHolder
         void onItemClick(View view, int position);
     }
 
-    private ViewPropertyTransition.Animator animationObject = new ViewPropertyTransition.Animator() {
-        @Override
-        public void animate(View view) {
-            ObjectAnimator fadeAnim = ObjectAnimator.ofFloat(view, "rotationY", 180f, 0f);
-            fadeAnim.setDuration(500);
-            fadeAnim.setAutoCancel(true);
-            fadeAnim.start();
-        }
+    private ViewPropertyTransition.Animator animationObject = view -> {
+        ObjectAnimator fadeAnim = ObjectAnimator.ofFloat(view, "rotationY", 180f, 0f);
+        fadeAnim.setDuration(500);
+        fadeAnim.setAutoCancel(true);
+        fadeAnim.start();
     };
 
 
