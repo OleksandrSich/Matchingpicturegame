@@ -2,19 +2,20 @@ package com.epam.oleksandr_sich.matchingpicturegame.data;
 
 import java.util.Objects;
 
-public class PhotoItem implements Cloneable{
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof PhotoItem)) return false;
-        PhotoItem photoItem = (PhotoItem) o;
-        return Objects.equals(getId(), photoItem.getId());
+public class PhotoItem implements Cloneable {
+    private String id;
+    private String url;
+    private ImageState state = ImageState.DEFAULT;
+    private ImageState previousState = ImageState.DEFAULT;
+
+    public void setState(ImageState state) {
+        this.state = state;
     }
 
-    @Override
-    public int hashCode() {
-
-        return Objects.hash(getId());
+    public PhotoItem(String id, String url, ImageState state) {
+        this.id = id;
+        this.url = url;
+        this.state = state;
     }
 
     public PhotoItem(String id, String url) {
@@ -22,9 +23,6 @@ public class PhotoItem implements Cloneable{
         this.url = url;
     }
 
-    private String id;
-
-    private String url;
 
     public ImageState getState() {
         return state;
@@ -40,13 +38,10 @@ public class PhotoItem implements Cloneable{
         this.id = source.id;
         this.url = source.url;
     }
-    private ImageState state = ImageState.DEFAULT;
 
     public ImageState getPreviousState() {
         return previousState;
     }
-
-    private ImageState previousState = ImageState.DEFAULT;
 
     public String getId() {
         return id;
@@ -66,5 +61,19 @@ public class PhotoItem implements Cloneable{
 
     public PhotoItem createDuplicate() {
         return new PhotoItem(this);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(getId());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PhotoItem)) return false;
+        PhotoItem photoItem = (PhotoItem) o;
+        return Objects.equals(getId(), photoItem.getId());
     }
 }

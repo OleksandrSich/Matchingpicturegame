@@ -5,15 +5,16 @@ import android.os.Handler;
 import com.epam.oleksandr_sich.matchingpicturegame.data.ImageState;
 
 public class GameControllerImpl implements GameController{
-    public GameControllerImpl(GameInteraction gameInteraction) {
-        this.gameInteraction = gameInteraction;
-    }
 
     private final Handler handler = new Handler();
     private GameInteraction gameInteraction;
     private int selectedPosition = -1;
     private int selectedItems = 0;
     private int steps = 0;
+
+    public GameControllerImpl(GameInteraction gameInteraction) {
+        this.gameInteraction = gameInteraction;
+    }
 
     @Override
     public void clearGameData() {
@@ -53,7 +54,7 @@ public class GameControllerImpl implements GameController{
         }
         addStep();
         if (selectedPosition == -1) {
-            chooseFirstCard(position);
+            actionChooseFirstCard(position);
             selectedItems++;
         } else {
             if (isTheSameCard(position)) {
@@ -64,13 +65,13 @@ public class GameControllerImpl implements GameController{
         }
     }
 
-    private void actionDone(int position) {
+    public void actionDone(int position) {
         markDone(position);
         clearSelections();
         if (isWon()) finishGame();
     }
 
-    private void actionCancel(int position) {
+    public void actionCancel(int position) {
         markCancel(position);
         selectedItems++;
         closeNotEqualsCardWithDelay(position);
@@ -94,11 +95,11 @@ public class GameControllerImpl implements GameController{
         }, 1000);
     }
 
-    private boolean isTheSameCard(int position) {
+    public boolean isTheSameCard(int position) {
         return gameInteraction.getItem(selectedPosition).equals(gameInteraction.getItem(position));
     }
 
-    private void chooseFirstCard(int position) {
+    public void actionChooseFirstCard(int position) {
         selectedPosition = position;
         gameInteraction.refreshItem(position, ImageState.SELECTED);
     }
