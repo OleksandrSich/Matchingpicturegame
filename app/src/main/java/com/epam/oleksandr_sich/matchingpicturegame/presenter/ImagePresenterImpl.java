@@ -1,8 +1,6 @@
 package com.epam.oleksandr_sich.matchingpicturegame.presenter;
 
 import android.app.Activity;
-import android.graphics.Point;
-import android.view.Display;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.Priority;
@@ -25,35 +23,42 @@ public class ImagePresenterImpl implements ImagePresenter {
     private final int START_PAGE = 1;
     private final int PER_PAGE = 8;
     public static int SPAN_COUNT = 4;
+
     private Activity context;
     private List<PhotoItem> photos = new ArrayList<>();
     private ImageRepository imageRepository;
     private ImageView view;
+    private boolean isNeedtoRetry = false;
+    private Disposable loadPhotosSubscription;
+
     private int lastPage = 2;
     private int currentPage = START_PAGE;
-    private Disposable loadPhotosSubscription;
     private int cardWeight;
 
-    public ImagePresenterImpl(Activity context, ImageView view) {
+    public ImagePresenterImpl(Activity context, ImageView view, ImageRepository imageRepository) {
         this.context = context;
         this.view = view;
-        imageRepository = new ImageRepository();
+        this.imageRepository = imageRepository;
     }
 
     @Override
     public void loadPhotos() {
         photos.clear();
+        isNeedtoRetry = false;
         view.showLoading(true);
         loadPhotosRequest(getNextPage());
     }
 
     private void loadPhotosRequest(int page) {
         loadPhotosSubscription = imageRepository.getPhotoList(page, PER_PAGE)
-                .map(response -> {lastPage = response.getPhotos().getPages();
-                        return response.getPhotos().getPhoto();})
+                .map(response -> {
+                    lastPage = response.getPhotos().getPages();
+                    return response.getPhotos().getPhoto();
+                })
                 .flatMap(Observable::fromIterable)
                 .subscribe(photo -> imageRepository.getPhoto(photo.getId())
-                        .doOnError(throwable -> view.showLoading(false))
+                        .doOnError(throwable -> {view.showLoading(false);
+                        view.showErrorMsg();})
                         .subscribe(this::loadPhoto));
     }
 
@@ -75,11 +80,15 @@ public class ImagePresenterImpl implements ImagePresenter {
 
     @Override
     public void onStop() {
-        loadPhotosSubscription.dispose();
+        if (!loadPhotosSubscription.isDisposed()){
+            loadPhotosSubscription.dispose();
+            isNeedtoRetry = true;
+        }
     }
 
     @Override
     public void onStart() {
+        if(isNeedtoRetry) loadPhotos();
     }
 
     private String getSizedPhoto(PhotoResponse photoResponse) {
@@ -87,7 +96,7 @@ public class ImagePresenterImpl implements ImagePresenter {
         Collections.sort(sizes, (size, t1) -> Integer.compare(size.getWidth(), t1.getWidth()));
         for (Size size : sizes) {
             if (size.getWidth() > getCardWeight()) {
-             return size.getSource();
+                return size.getSource();
             }
         }
         return photoResponse.getSizes().getSize().get(0).getSource();
@@ -96,7 +105,7 @@ public class ImagePresenterImpl implements ImagePresenter {
     private void loadPhoto(PhotoResponse photoResponse) {
         addItemToList(photoResponse);
         loadImage(photoResponse);
-        if(isListFull()) {
+        if (isListFull()) {
             view.showLoading(false);
             shuffleList();
             view.showImages(photos);
@@ -112,19 +121,16 @@ public class ImagePresenterImpl implements ImagePresenter {
     }
 
     public int getCardWeight() {
-        if (cardWeight <= 0 && context.getWindowManager() != null) {
-            Display display = context.getWindowManager().getDefaultDisplay();
-            Point size = new Point();
-            display.getSize(size);
-            cardWeight = size.x / SPAN_COUNT;
+        if (cardWeight <= 0 ) {
+            cardWeight = view.getDisplayWidth() / SPAN_COUNT;
         }
         return cardWeight;
     }
 
-    private int getNextPage(){
-        if (currentPage < lastPage){
+    private int getNextPage() {
+        if (currentPage < lastPage) {
             currentPage++;
         } else currentPage = START_PAGE;
-       return currentPage;
+        return currentPage;
     }
 }

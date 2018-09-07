@@ -1,10 +1,7 @@
-package com.epam.oleksandr_sich.matchingpicturegame;
+package com.epam.oleksandr_sich.matchingpicturegame.game;
 
 import com.epam.oleksandr_sich.matchingpicturegame.data.ImageState;
 import com.epam.oleksandr_sich.matchingpicturegame.data.PhotoItem;
-import com.epam.oleksandr_sich.matchingpicturegame.game.GameController;
-import com.epam.oleksandr_sich.matchingpicturegame.game.GameControllerImpl;
-import com.epam.oleksandr_sich.matchingpicturegame.game.GameInteraction;
 
 import org.junit.After;
 import org.junit.Before;
@@ -14,13 +11,14 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
-public class GameControllerTest {
-    private GameController subject;
+public class GameInteractionTest {
+    private GameControllerImpl subject;
     private PhotoItem firstCard;
     private PhotoItem secondCard;
     @Mock
@@ -79,7 +77,7 @@ public class GameControllerTest {
     }
 
     @Test
-    public void gameController_flipCards_equal_neverCall_refreshItem_CLOSE() throws Exception {
+    public void gameController_flipCards_equal_neverCall_refreshItem_CLOSED() throws Exception {
         when(gameInteraction.getItem(fistPosition)).thenReturn(firstCard);
         when(gameInteraction.getItem(secondPosition)).thenReturn(firstCard);
         subject.flipCard(fistPosition);
@@ -109,4 +107,34 @@ public class GameControllerTest {
         verify(gameInteraction, never()).refreshItem(secondPosition, ImageState.DONE);
     }
 
+    @Test
+    public void gameController_flipCards_equal_withRestart_neverCall_refreshItem_CLOSED() throws Exception {
+        when(gameInteraction.getItem(fistPosition)).thenReturn(firstCard);
+        when(gameInteraction.getItem(secondPosition)).thenReturn(secondCard);
+        subject.flipCard(fistPosition);
+        subject.clearGameData();
+        subject.flipCard(secondPosition);
+        verify(gameInteraction, never()).refreshItem(fistPosition, ImageState.CLOSED);
+        verify(gameInteraction, never()).refreshItem(secondPosition, ImageState.CLOSED);
+    }
+
+    @Test
+    public void gameController_finishGame_allDone() throws Exception {
+        firstCard.setState(ImageState.DONE);
+        secondCard.setState(ImageState.DONE);
+        when(gameInteraction.getItem(fistPosition)).thenReturn(firstCard);
+        when(gameInteraction.getItem(secondPosition)).thenReturn(secondCard);
+        subject.checkGameIsOver();
+        verify(gameInteraction).gameFinished(anyInt());
+    }
+
+    @Test
+    public void gameController_neverCall_finishGame_someDone() throws Exception {
+        firstCard.setState(ImageState.DEFAULT);
+        secondCard.setState(ImageState.DONE);
+        when(gameInteraction.getItem(fistPosition)).thenReturn(firstCard);
+        when(gameInteraction.getItem(secondPosition)).thenReturn(secondCard);
+        subject.checkGameIsOver();
+        verify(gameInteraction, never()).gameFinished(anyInt());
+    }
 }

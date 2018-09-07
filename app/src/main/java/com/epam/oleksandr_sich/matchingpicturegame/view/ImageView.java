@@ -10,4 +10,6 @@ public interface ImageView {
     void showLoading(boolean state);
 
     void showErrorMsg();
+
+    int getDisplayWidth();
 }

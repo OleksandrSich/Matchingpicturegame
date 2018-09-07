@@ -82,5 +82,7 @@ android {
             exclude module: 'support-annotations'
             exclude module: 'recyclerview-v7'
         }
+
+        testImplementation 'org.assertj:assertj-core:3.6.2'
     }
 }

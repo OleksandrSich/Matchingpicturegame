@@ -68,6 +68,10 @@ public class GameControllerImpl implements GameController{
     public void actionDone(int position) {
         markDone(position);
         clearSelections();
+        checkGameIsOver();
+    }
+
+    public void checkGameIsOver() {
         if (isWon()) finishGame();
     }
 

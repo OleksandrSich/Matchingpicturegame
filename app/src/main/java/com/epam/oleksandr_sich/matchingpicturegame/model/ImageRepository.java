@@ -1,17 +1,13 @@
 package com.epam.oleksandr_sich.matchingpicturegame.model;
 
-import android.util.Log;
-
 import com.epam.oleksandr_sich.matchingpicturegame.data.PhotoListResponse;
 import com.epam.oleksandr_sich.matchingpicturegame.data.PhotoResponse;
-import com.epam.oleksandr_sich.matchingpicturegame.utils.BaseSchedulerProvider;
 import com.epam.oleksandr_sich.matchingpicturegame.network.NetworkClient;
 import com.epam.oleksandr_sich.matchingpicturegame.network.NetworkInterface;
+import com.epam.oleksandr_sich.matchingpicturegame.utils.BaseSchedulerProvider;
 import com.epam.oleksandr_sich.matchingpicturegame.utils.SchedulerProvider;
 
 import io.reactivex.Observable;
-import io.reactivex.Observer;
-import io.reactivex.disposables.Disposable;
 
 public class ImageRepository implements ImagesDataResource {
 

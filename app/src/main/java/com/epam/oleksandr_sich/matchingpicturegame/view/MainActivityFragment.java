@@ -1,11 +1,13 @@
 package com.epam.oleksandr_sich.matchingpicturegame.view;
 
+import android.graphics.Point;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,6 +22,7 @@ import com.epam.oleksandr_sich.matchingpicturegame.data.ImageState;
 import com.epam.oleksandr_sich.matchingpicturegame.data.PhotoItem;
 import com.epam.oleksandr_sich.matchingpicturegame.game.GameControllerImpl;
 import com.epam.oleksandr_sich.matchingpicturegame.game.GameInteraction;
+import com.epam.oleksandr_sich.matchingpicturegame.model.ImageRepository;
 import com.epam.oleksandr_sich.matchingpicturegame.presenter.ImagePresenterImpl;
 
 import java.util.ArrayList;
@@ -56,7 +59,7 @@ public class MainActivityFragment extends Fragment implements ImagesAdapter.Item
     }
 
     private void init() {
-        presenter = new ImagePresenterImpl(getActivity(), this);
+        presenter = new ImagePresenterImpl(getActivity(), this, new ImageRepository());
         initList();
         initAdapter();
         gameControllerImpl = new GameControllerImpl(this);
@@ -162,4 +165,15 @@ public class MainActivityFragment extends Fragment implements ImagesAdapter.Item
         presenter.loadPhotos();
     }
 
+    @Override
+    public int getDisplayWidth() {
+        if (getActivity() == null || getActivity().getWindowManager() == null) {
+            return 0;
+        }
+
+        Display display = getActivity().getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        return size.x;
+    }
 }
