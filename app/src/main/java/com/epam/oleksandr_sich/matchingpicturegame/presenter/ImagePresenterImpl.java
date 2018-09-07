@@ -28,7 +28,7 @@ public class ImagePresenterImpl implements ImagePresenter {
     private List<PhotoItem> photos = new ArrayList<>();
     private ImageRepository imageRepository;
     private ImageView view;
-    private boolean isNeedtoRetry = false;
+    private boolean isNeedToRetry = false;
     private Disposable loadPhotosSubscription;
 
     private int lastPage = 2;
@@ -44,7 +44,7 @@ public class ImagePresenterImpl implements ImagePresenter {
     @Override
     public void loadPhotos() {
         photos.clear();
-        isNeedtoRetry = false;
+        isNeedToRetry = false;
         view.showLoading(true);
         loadPhotosRequest(getNextPage());
     }
@@ -82,13 +82,13 @@ public class ImagePresenterImpl implements ImagePresenter {
     public void onStop() {
         if (!loadPhotosSubscription.isDisposed()){
             loadPhotosSubscription.dispose();
-            isNeedtoRetry = true;
+            isNeedToRetry = true;
         }
     }
 
     @Override
     public void onStart() {
-        if(isNeedtoRetry) loadPhotos();
+        if(isNeedToRetry) loadPhotos();
     }
 
     private String getSizedPhoto(PhotoResponse photoResponse) {
