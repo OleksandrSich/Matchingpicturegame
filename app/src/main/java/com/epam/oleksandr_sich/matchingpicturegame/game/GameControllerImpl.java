@@ -2,18 +2,15 @@ package com.epam.oleksandr_sich.matchingpicturegame.game;
 
 import android.os.Handler;
 
-import com.epam.oleksandr_sich.matchingpicturegame.ImagesAdapter;
 import com.epam.oleksandr_sich.matchingpicturegame.data.ImageState;
 
 public class GameControllerImpl implements GameController{
-    public GameControllerImpl(ImagesAdapter adapter, GameResult gameResult) {
-        this.adapter = adapter;
-        this.gameResult = gameResult;
+    public GameControllerImpl(GameInteraction gameInteraction) {
+        this.gameInteraction = gameInteraction;
     }
 
     private final Handler handler = new Handler();
-    private ImagesAdapter adapter;
-    private GameResult gameResult;
+    private GameInteraction gameInteraction;
     private int selectedPosition = -1;
     private int selectedItems = 0;
     private int steps = 0;
@@ -34,14 +31,14 @@ public class GameControllerImpl implements GameController{
     }
 
     private boolean isAbleToSelect(int position) {
-        return adapter.getItem(position).getState() == ImageState.DEFAULT &&
+        return gameInteraction.getItem(position).getState() == ImageState.DEFAULT &&
                 selectedItems < 2;
     }
 
     private boolean isWon() {
         boolean res = true;
-        for (int i = 0; i < adapter.getItemCount(); i++) {
-            if (adapter.getItem(i).getState() != ImageState.DONE) {
+        for (int i = 0; i < gameInteraction.getItemCount(); i++) {
+            if (gameInteraction.getItem(i).getState() != ImageState.DONE) {
                 res = false;
                 break;
             }
@@ -56,40 +53,54 @@ public class GameControllerImpl implements GameController{
         }
         addStep();
         if (selectedPosition == -1) {
-            chooseFirstCadr(position);
+            chooseFirstCard(position);
             selectedItems++;
         } else {
             if (isTheSameCard(position)) {
-                updateItemState(selectedPosition, ImageState.DONE);
-                updateItemState(position, ImageState.DONE);
-                clearSelections();
-                if (isWon()) finishGame();
+                actionDone(position);
             } else {
-                updateItemState(selectedPosition, ImageState.CLOSED);
-                updateItemState(position, ImageState.CLOSED);
-                selectedItems++;
-                closeNotEqualsCardWithDelay(position);
-
+                actionCancel(position);
             }
         }
+    }
 
+    private void actionDone(int position) {
+        markDone(position);
+        clearSelections();
+        if (isWon()) finishGame();
+    }
+
+    private void actionCancel(int position) {
+        markCancel(position);
+        selectedItems++;
+        closeNotEqualsCardWithDelay(position);
+    }
+
+    private void markCancel(int position) {
+        gameInteraction.refreshItem(selectedPosition, ImageState.CLOSED);
+        gameInteraction.refreshItem(position, ImageState.CLOSED);
+    }
+
+    private void markDone(int position) {
+        gameInteraction.refreshItem(selectedPosition, ImageState.DONE);
+        gameInteraction.refreshItem(position, ImageState.DONE);
     }
 
     private void closeNotEqualsCardWithDelay(int position) {
         handler.postDelayed(() -> {
-            updateItemState(selectedPosition, ImageState.DEFAULT);
-            updateItemState(position, ImageState.DEFAULT);
+            gameInteraction.refreshItem(selectedPosition, ImageState.DEFAULT);
+            gameInteraction.refreshItem(position, ImageState.DEFAULT);
             clearSelections();
         }, 1000);
     }
 
     private boolean isTheSameCard(int position) {
-        return adapter.getItem(selectedPosition).equals(adapter.getItem(position));
+        return gameInteraction.getItem(selectedPosition).equals(gameInteraction.getItem(position));
     }
 
-    private void chooseFirstCadr(int position) {
+    private void chooseFirstCard(int position) {
         selectedPosition = position;
-        updateItemState(position, ImageState.SELECTED);
+        gameInteraction.refreshItem(position, ImageState.SELECTED);
     }
 
     private void addStep() {
@@ -97,11 +108,8 @@ public class GameControllerImpl implements GameController{
     }
 
     private void finishGame() {
-        gameResult.gameFinished(steps/2);
+        gameInteraction.gameFinished(steps/2);
     }
 
-    private void updateItemState(int position, ImageState imageState) {
-        adapter.getItem(position).updateState(imageState);
-        adapter.notifyItemChanged(position);
-    }
+
 }

@@ -16,9 +16,10 @@ import android.widget.Toast;
 
 import com.epam.oleksandr_sich.matchingpicturegame.ImagesAdapter;
 import com.epam.oleksandr_sich.matchingpicturegame.R;
+import com.epam.oleksandr_sich.matchingpicturegame.data.ImageState;
 import com.epam.oleksandr_sich.matchingpicturegame.data.PhotoItem;
 import com.epam.oleksandr_sich.matchingpicturegame.game.GameControllerImpl;
-import com.epam.oleksandr_sich.matchingpicturegame.game.GameResult;
+import com.epam.oleksandr_sich.matchingpicturegame.game.GameInteraction;
 import com.epam.oleksandr_sich.matchingpicturegame.presenter.ImagePresenterImpl;
 
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ import java.util.List;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class MainActivityFragment extends Fragment implements ImagesAdapter.ItemClickListener, ImageView, GameResult {
+public class MainActivityFragment extends Fragment implements ImagesAdapter.ItemClickListener, ImageView, GameInteraction {
 
     private RecyclerView recyclerView;
     private ImagePresenterImpl presenter;
@@ -58,7 +59,7 @@ public class MainActivityFragment extends Fragment implements ImagesAdapter.Item
         presenter = new ImagePresenterImpl(getActivity(), this);
         initList();
         initAdapter();
-        gameControllerImpl = new GameControllerImpl(adapter, this);
+        gameControllerImpl = new GameControllerImpl(this);
         setHasOptionsMenu(true);
     }
 
@@ -125,6 +126,22 @@ public class MainActivityFragment extends Fragment implements ImagesAdapter.Item
     @Override
     public void gameFinished(int steps) {
         showFinishAlert(steps);
+    }
+
+    @Override
+    public PhotoItem getItem(int position) {
+        return adapter.getItem(position);
+    }
+
+    @Override
+    public int getItemCount() {
+        return adapter.getItemCount();
+    }
+
+    @Override
+    public void refreshItem(int position, ImageState imageState) {
+        adapter.getItem(position).updateState(imageState);
+        adapter.notifyItemChanged(position);
     }
 
     private void showFinishAlert(int steps) {
